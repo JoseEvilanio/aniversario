@@ -9,6 +9,7 @@ import BirthdayList from './pages/BirthdayList';
 import BirthdayForm from './pages/BirthdayForm';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
+import PublicRegister from './pages/PublicRegister';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
@@ -20,55 +21,56 @@ const AppRoutes: React.FC = () => {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route 
-        path="/" 
+      <Route path="/register/:ownerId" element={<PublicRegister />} />
+      <Route
+        path="/"
         element={
           <ProtectedRoute>
             <Layout>
               <Dashboard />
             </Layout>
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/list" 
+      <Route
+        path="/list"
         element={
           <ProtectedRoute>
             <Layout>
               <BirthdayList />
             </Layout>
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/new" 
+      <Route
+        path="/new"
         element={
           <ProtectedRoute>
             <Layout>
               <BirthdayForm />
             </Layout>
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/edit/:id" 
+      <Route
+        path="/edit/:id"
         element={
           <ProtectedRoute>
             <Layout>
               <BirthdayForm />
             </Layout>
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/settings" 
+      <Route
+        path="/settings"
         element={
           <ProtectedRoute>
             <Layout>
               <Settings />
             </Layout>
           </ProtectedRoute>
-        } 
+        }
       />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

@@ -1,19 +1,63 @@
 
 import React from 'react';
 import { useBirthdays } from '../context/BirthdayContext';
-import { Bell, Clock, CalendarDays, ShieldCheck } from 'lucide-react';
+import { Bell, Clock, CalendarDays, ShieldCheck, Link2, Copy, Check } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useState } from 'react';
 
 const Settings: React.FC = () => {
   const { settings, updateSettings } = useBirthdays();
+  const { user } = useAuth();
+  const [copied, setCopied] = useState(false);
+
+  const publicLink = `${window.location.origin}/#/register/${user?.uid}`;
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(publicLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
+    <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-top-4 duration-500 pb-12">
       <div>
         <h2 className="text-2xl font-bold text-slate-800">Configurações do Sistema</h2>
-        <p className="text-slate-500">Ajuste como o BdayHub deve te notificar sobre as datas.</p>
+        <p className="text-slate-500">Gerencie suas preferências e o link de cadastro público.</p>
       </div>
 
       <div className="bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden divide-y">
+        {/* Public Share Link */}
+        <div className="p-8 bg-indigo-50/30">
+          <div className="flex gap-4">
+            <div className="bg-indigo-600 p-3 rounded-2xl h-fit shadow-lg shadow-indigo-100">
+              <Link2 className="h-6 w-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <h4 className="font-bold text-slate-800">Link de Cadastro Público</h4>
+              <p className="text-sm text-slate-500 mt-1 mb-4">
+                Compartilhe este link com seus amigos ou clientes para que eles mesmos cadastrem seus aniversários.
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={publicLink}
+                  className="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-600 outline-none"
+                />
+                <button
+                  onClick={copyToClipboard}
+                  className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 ${copied
+                      ? 'bg-emerald-500 text-white shadow-emerald-100'
+                      : 'bg-indigo-600 text-white shadow-indigo-100'
+                    } shadow-lg`}
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copied ? 'Copiado!' : 'Copiar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
         {/* Notifications Toggle */}
         <div className="p-8 flex items-start justify-between gap-6">
           <div className="flex gap-4">
@@ -27,7 +71,7 @@ const Settings: React.FC = () => {
               </p>
             </div>
           </div>
-          <button 
+          <button
             onClick={() => updateSettings({ ...settings, notificationsEnabled: !settings.notificationsEnabled })}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${settings.notificationsEnabled ? 'bg-indigo-600' : 'bg-slate-200'}`}
           >
@@ -52,11 +96,10 @@ const Settings: React.FC = () => {
                 <button
                   key={days}
                   onClick={() => updateSettings({ ...settings, notificationDays: days })}
-                  className={`px-4 py-2 rounded-xl text-sm font-bold border transition-all ${
-                    settings.notificationDays === days 
-                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' 
+                  className={`px-4 py-2 rounded-xl text-sm font-bold border transition-all ${settings.notificationDays === days
+                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
                       : 'bg-white text-slate-600 border-slate-100 hover:bg-slate-50'
-                  }`}
+                    }`}
                 >
                   {days} {days === 1 ? 'dia' : 'dias'}
                 </button>
@@ -77,8 +120,8 @@ const Settings: React.FC = () => {
                 Defina o horário em que novas notificações do dia devem aparecer.
               </p>
             </div>
-            <input 
-              type="time" 
+            <input
+              type="time"
               value={settings.notificationTime}
               onChange={e => updateSettings({ ...settings, notificationTime: e.target.value })}
               className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium text-slate-700"

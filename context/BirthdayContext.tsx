@@ -1,13 +1,13 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { 
-  collection, 
-  onSnapshot, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  doc, 
-  query, 
+import {
+  collection,
+  onSnapshot,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  query,
   setDoc,
   getDoc
 } from 'firebase/firestore';
@@ -21,6 +21,7 @@ interface BirthdayContextType {
   notifications: Notification[];
   settings: UserSettings;
   addBirthday: (b: Omit<Birthday, 'id' | 'createdAt' | 'userId'>) => Promise<void>;
+  publicAddBirthday: (ownerId: string, b: Omit<Birthday, 'id' | 'createdAt' | 'userId'>) => Promise<void>;
   updateBirthday: (id: string, b: Partial<Birthday>) => Promise<void>;
   deleteBirthday: (id: string) => Promise<void>;
   markNotificationRead: (id: string) => Promise<void>;
@@ -59,7 +60,7 @@ export const BirthdayProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     // Subscribe to Birthdays
     const bdaysQuery = query(collection(db, 'users', user.uid, 'birthdays'));
-    const unsubscribeBdays = onSnapshot(bdaysQuery, 
+    const unsubscribeBdays = onSnapshot(bdaysQuery,
       (snapshot) => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Birthday));
         setBirthdays(data);
@@ -75,7 +76,7 @@ export const BirthdayProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     // Subscribe to Notifications
     const notifsQuery = query(collection(db, 'users', user.uid, 'notifications'));
-    const unsubscribeNotifs = onSnapshot(notifsQuery, 
+    const unsubscribeNotifs = onSnapshot(notifsQuery,
       (snapshot) => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Notification))
           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -97,7 +98,7 @@ export const BirthdayProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (settingsDoc.exists()) {
           setSettings(settingsDoc.data() as UserSettings);
         } else {
-          await setDoc(settingsRef, settings).catch(() => {});
+          await setDoc(settingsRef, settings).catch(() => { });
         }
         setPermissionError(false);
       } catch (error: any) {
@@ -144,7 +145,7 @@ export const BirthdayProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           });
         }
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [birthdays, settings, notifications, user, permissionError]);
 
   useEffect(() => {
@@ -160,6 +161,14 @@ export const BirthdayProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       ...b,
       createdAt: new Date().toISOString(),
       userId: user.uid
+    });
+  };
+
+  const publicAddBirthday = async (ownerId: string, b: Omit<Birthday, 'id' | 'createdAt' | 'userId'>) => {
+    await addDoc(collection(db, 'users', ownerId, 'birthdays'), {
+      ...b,
+      createdAt: new Date().toISOString(),
+      userId: ownerId
     });
   };
 
@@ -187,13 +196,14 @@ export const BirthdayProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
-    <BirthdayContext.Provider value={{ 
-      birthdays, 
-      notifications, 
-      settings, 
-      addBirthday, 
-      updateBirthday, 
-      deleteBirthday, 
+    <BirthdayContext.Provider value={{
+      birthdays,
+      notifications,
+      settings,
+      addBirthday,
+      publicAddBirthday,
+      updateBirthday,
+      deleteBirthday,
       markNotificationRead,
       updateSettings,
       unreadCount,
