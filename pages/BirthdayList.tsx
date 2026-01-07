@@ -217,4 +217,3 @@ const BirthdayList: React.FC = () => {
 };
 
 export default BirthdayList;
-```
