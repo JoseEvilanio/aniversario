@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { useBirthdays } from '../context/BirthdayContext';
 import { calculateAge, daysUntil, formatDateBr } from '../utils';
 import { CATEGORY_COLORS } from '../constants';
-import { Search, Filter, Edit2, Trash2, Mail, Phone } from 'lucide-react';
+import { Search, Filter, Edit2, Trash2, Mail, Phone, PlusCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const BirthdayList: React.FC = () => {
@@ -35,21 +35,22 @@ const BirthdayList: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-        <h2 className="text-2xl font-bold text-slate-800">Todos os Aniversários</h2>
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <div className="relative flex-1 md:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Buscar por nome..." 
+      <div className="flex flex-col md:flex-row gap-5 items-start md:items-center justify-between">
+        <h2 className="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight">Aniversariantes</h2>
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+          <div className="relative w-full md:w-72">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Buscar por nome..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm"
+              className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm font-medium"
             />
           </div>
-          <Link to="/new" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-md active:scale-95 flex-shrink-0">
-            Cadastrar
+          <Link to="/new" className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3.5 sm:py-2.5 rounded-2xl text-sm font-bold transition-all shadow-lg shadow-indigo-100 active:scale-95 flex items-center justify-center gap-2">
+            <PlusCircle className="h-4 w-4 md:hidden" />
+            Cadastrar Novo
           </Link>
         </div>
       </div>
@@ -65,11 +66,10 @@ const BirthdayList: React.FC = () => {
           <button
             key={filter.id}
             onClick={() => setActiveFilter(filter.id as any)}
-            className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
-              activeFilter === filter.id 
-                ? 'bg-indigo-600 text-white shadow-md' 
-                : 'bg-white text-slate-600 border border-slate-100 hover:bg-slate-50'
-            }`}
+            className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${activeFilter === filter.id
+              ? 'bg-indigo-600 text-white shadow-md'
+              : 'bg-white text-slate-600 border border-slate-100 hover:bg-slate-50'
+              }`}
           >
             {filter.label}
           </button>
@@ -125,7 +125,7 @@ const BirthdayList: React.FC = () => {
                       <Link to={`/edit/${b.id}`} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
                         <Edit2 className="h-4 w-4" />
                       </Link>
-                      <button 
+                      <button
                         onClick={() => handleDelete(b.id, b.fullName)}
                         className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       >
@@ -141,68 +141,80 @@ const BirthdayList: React.FC = () => {
       </div>
 
       {/* Mobile Card View */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:hidden gap-4">
-        {filteredBirthdays.map(b => (
-          <div key={b.id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className={`h-12 w-12 rounded-full flex items-center justify-center font-bold text-lg ${CATEGORY_COLORS[b.category]}`}>
-                  {b.fullName.charAt(0)}
-                </div>
-                <div>
-                  <h4 className="font-bold text-slate-800">{b.fullName}</h4>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${CATEGORY_COLORS[b.category]}`}>
-                    {b.category}
-                  </span>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-xl font-bold text-indigo-600">{calculateAge(b.birthDate)}</p>
-                <p className="text-[10px] text-slate-400 uppercase font-bold">Anos</p>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="bg-slate-50 p-2 rounded-lg">
-                <p className="text-slate-400 mb-1 font-medium">Aniversário</p>
-                <p className="font-bold text-slate-700">{formatDateBr(b.birthDate)}</p>
-              </div>
-              <div className="bg-slate-50 p-2 rounded-lg">
-                <p className="text-slate-400 mb-1 font-medium">Status</p>
-                <p className="font-bold text-indigo-600">{daysUntil(b.birthDate) === 0 ? 'HOJE 🎂' : `${daysUntil(b.birthDate)} dias`}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-2 border-t">
-              <div className="flex gap-2">
-                {b.email && (
-                  <a href={`mailto:${b.email}`} className="p-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition-colors">
-                    <Mail className="h-4 w-4" />
-                  </a>
-                )}
-                {b.phone && (
-                  <a href={`tel:${b.phone}`} className="p-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition-colors">
-                    <Phone className="h-4 w-4" />
-                  </a>
-                )}
-              </div>
-              <div className="flex gap-2">
-                <Link to={`/edit/${b.id}`} className="p-2 text-slate-400 hover:text-indigo-600 rounded-lg">
-                  <Edit2 className="h-4 w-4" />
-                </Link>
-                <button 
-                  onClick={() => handleDelete(b.id, b.fullName)}
-                  className="p-2 text-slate-400 hover:text-red-600 rounded-lg"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:hidden gap-4">
+        {filteredBirthdays.length === 0 ? (
+          <div className="bg-white p-12 rounded-2xl border border-dashed border-slate-300 text-center text-slate-400 col-span-full">
+            Nenhum aniversariante encontrado.
           </div>
-        ))}
+        ) : (
+          filteredBirthdays.map(b => (
+            <div key={b.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-5 animate-in fade-in zoom-in-95 duration-300 active:bg-slate-50 transition-colors">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className={`h-14 w-14 rounded-full flex items-center justify-center font-bold text-xl shadow-inner ${CATEGORY_COLORS[b.category]}`}>
+                    {b.fullName.charAt(0)}
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 leading-tight text-lg line-clamp-1">{b.fullName}</h4>
+                    <span className={`inline-block mt-1 px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${CATEGORY_COLORS[b.category].replace('bg-', 'bg-opacity-20 text-').replace('-100', '-700')} bg-slate-100`}>
+                      {b.category}
+                    </span>
+                  </div>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p className="text-2xl font-black text-indigo-600 tracking-tighter">{calculateAge(b.birthDate)}</p>
+                  <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Anos</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="bg-slate-50/80 p-3 rounded-xl border border-slate-100/50">
+                  <p className="text-slate-400 mb-1 font-bold uppercase tracking-tighter text-[9px]">Aniversário</p>
+                  <p className="font-bold text-slate-700">{formatDateBr(b.birthDate)}</p>
+                </div>
+                <div className="bg-indigo-50/50 p-3 rounded-xl border border-indigo-100/50">
+                  <p className="text-indigo-400 mb-1 font-bold uppercase tracking-tighter text-[9px]">Status</p>
+                  <p className="font-black text-indigo-700">
+                    {daysUntil(b.birthDate) === 0 || daysUntil(b.birthDate) === 365 || daysUntil(b.birthDate) === 366
+                      ? 'HOJE 🎂'
+                      : `${daysUntil(b.birthDate)} dias`}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                <div className="flex gap-2.5">
+                  {b.email && (
+                    <a href={`mailto:${b.email}`} className="p-3 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all shadow-sm active:scale-90">
+                      <Mail className="h-5 w-5" />
+                    </a>
+                  )}
+                  {b.phone && (
+                    <a href={`tel:${b.phone}`} className="p-3 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all shadow-sm active:scale-90">
+                      <Phone className="h-5 w-5" />
+                    </a>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <Link to={`/edit/${b.id}`} className="p-3 bg-slate-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-all font-bold text-sm flex items-center gap-2">
+                    <Edit2 className="h-4 w-4" />
+                    Editar
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(b.id, b.fullName)}
+                    className="p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all active:scale-90"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
 };
 
 export default BirthdayList;
+```

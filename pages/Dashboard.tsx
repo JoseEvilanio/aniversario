@@ -29,33 +29,33 @@ const Dashboard: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
       {/* Welcome Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">Olá, Admin! 👋</h2>
-          <p className="text-slate-500">Bem-vindo ao seu painel de aniversários.</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900">Olá, Admin! 👋</h2>
+          <p className="text-slate-500 mt-1">Bem-vindo ao seu painel de aniversários.</p>
         </div>
-        <Link 
-          to="/new" 
-          className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-indigo-200 transition-all active:scale-95"
+        <Link
+          to="/new"
+          className="inline-flex items-center justify-center gap-3 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3.5 md:py-2.5 rounded-2xl md:rounded-xl font-bold shadow-lg shadow-indigo-200 transition-all active:scale-95 w-full md:w-auto"
         >
-          <Cake className="h-4 w-4" />
+          <Cake className="h-5 w-5 md:h-4 md:w-4" />
           Novo Aniversariante
         </Link>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
         {stats.map((stat, i) => (
-          <div key={i} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+          <div key={i} className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow active:bg-slate-50/50 md:active:scale-100 active:scale-[0.98]">
             <div className="flex items-center gap-4">
-              <div className={`${stat.color} p-3 rounded-xl text-white`}>
+              <div className={`${stat.color} p-3 rounded-2xl md:rounded-xl text-white shadow-sm`}>
                 <stat.icon className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-500">{stat.label}</p>
-                <p className="text-2xl font-bold text-slate-800">{stat.value}</p>
+                <p className="text-sm font-semibold text-slate-500">{stat.label}</p>
+                <p className="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight">{stat.value}</p>
               </div>
             </div>
           </div>

@@ -66,21 +66,29 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       )}
 
       {/* Mobile Header */}
-      <header className={`md:hidden bg-white border-b px-4 py-3 flex items-center justify-between sticky top-0 z-50 ${permissionError ? 'mt-24 sm:mt-12' : ''}`}>
-        <div className="flex items-center gap-2">
-          <Calendar className="text-indigo-600 h-6 w-6" />
-          <span className="font-bold text-xl text-slate-800">BdayHub</span>
+      <header className={`md:hidden bg-white/80 backdrop-blur-md border-b px-5 py-4 flex items-center justify-between sticky top-0 z-50 ${permissionError ? 'mt-24 sm:mt-12' : ''}`}>
+        <div className="flex items-center gap-2.5">
+          <div className="bg-indigo-600 p-1.5 rounded-lg shadow-sm shadow-indigo-100">
+            <Calendar className="text-white h-5 w-5" />
+          </div>
+          <span className="font-bold text-xl text-slate-800 tracking-tight">BdayHub</span>
         </div>
-        <div className="flex items-center gap-4">
-          <button onClick={() => setIsNotifOpen(!isNotifOpen)} className="relative p-2 text-slate-600">
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setIsNotifOpen(!isNotifOpen)} 
+            className="relative p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+          >
             <Bell className="h-6 w-6" />
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+              <span className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center border-2 border-white">
                 {unreadCount}
               </span>
             )}
           </button>
-          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 text-slate-600">
+          <button 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+            className="p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+          >
             {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
