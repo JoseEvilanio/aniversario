@@ -10,9 +10,12 @@ const Settings: React.FC = () => {
   const { user } = useAuth();
   const [copied, setCopied] = useState(false);
 
-  const publicLink = `${window.location.origin}/#/register/${user?.uid}`;
+  const publicLink = user?.uid
+    ? `${window.location.origin}/#/register/${user.uid}`
+    : 'Gerando link...';
 
   const copyToClipboard = () => {
+    if (!user?.uid) return;
     navigator.clipboard.writeText(publicLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -47,8 +50,8 @@ const Settings: React.FC = () => {
                 <button
                   onClick={copyToClipboard}
                   className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 ${copied
-                      ? 'bg-emerald-500 text-white shadow-emerald-100'
-                      : 'bg-indigo-600 text-white shadow-indigo-100'
+                    ? 'bg-emerald-500 text-white shadow-emerald-100'
+                    : 'bg-indigo-600 text-white shadow-indigo-100'
                     } shadow-lg`}
                 >
                   {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -97,8 +100,8 @@ const Settings: React.FC = () => {
                   key={days}
                   onClick={() => updateSettings({ ...settings, notificationDays: days })}
                   className={`px-4 py-2 rounded-xl text-sm font-bold border transition-all ${settings.notificationDays === days
-                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
-                      : 'bg-white text-slate-600 border-slate-100 hover:bg-slate-50'
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
+                    : 'bg-white text-slate-600 border-slate-100 hover:bg-slate-50'
                     }`}
                 >
                   {days} {days === 1 ? 'dia' : 'dias'}

@@ -18,12 +18,36 @@ const PublicRegister: React.FC = () => {
     });
 
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const [errorMessage, setErrorMessage] = useState('');
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 8) value = value.slice(0, 8);
+
+        let formatted = value;
+        if (value.length > 2) formatted = `${value.slice(0, 2)}/${value.slice(2)}`;
+        if (value.length > 4) formatted = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4)}`;
+
+        setFormData({ ...formData, birthDate: formatted });
+    };
 
     const validate = () => {
         const newErrors: Record<string, string> = {};
         if (!formData.fullName.trim()) newErrors.fullName = 'Nome é obrigatório';
-        if (!formData.birthDate) newErrors.birthDate = 'Data de nascimento é obrigatória';
+        if (!formData.birthDate) {
+            newErrors.birthDate = 'Data de nascimento é obrigatória';
+        } else if (formData.birthDate.length < 10) {
+            newErrors.birthDate = 'Data incompleta (DD/MM/AAAA)';
+        } else {
+            const [d, m, y] = formData.birthDate.split('/').map(Number);
+            const date = new Date(y, m - 1, d);
+            if (isNaN(date.getTime()) || date.getFullYear() !== y || date.getMonth() !== m - 1 || date.getDate() !== d) {
+                newErrors.birthDate = 'Data inválida';
+            } else if (y > new Date().getFullYear()) {
+                newErrors.birthDate = 'Ano inválido';
+            }
+        }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -33,10 +57,15 @@ const PublicRegister: React.FC = () => {
         if (!validate() || !ownerId) return;
 
         setStatus('loading');
+        setErrorMessage('');
         try {
+            // Convert DD/MM/YYYY to YYYY-MM-DD for storage
+            const [d, m, y] = formData.birthDate.split('/');
+            const isoDate = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+
             await publicAddBirthday(ownerId, {
                 fullName: formData.fullName,
-                birthDate: formData.birthDate,
+                birthDate: isoDate,
                 email: formData.email,
                 phone: formData.phone,
                 category: formData.category,
@@ -50,9 +79,14 @@ const PublicRegister: React.FC = () => {
                 phone: '',
                 category: 'Outros',
             });
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
             setStatus('error');
+            if (error.code === 'permission-denied') {
+                setErrorMessage('Erro de permissão: O sistema ainda não está configurado para aceitar cadastros públicos externos no banco de dados.');
+            } else {
+                setErrorMessage('Ocorreu um erro ao salvar. Tente novamente mais tarde.');
+            }
         }
     };
 
@@ -122,10 +156,12 @@ const PublicRegister: React.FC = () => {
                             <div className="relative">
                                 <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300" />
                                 <input
-                                    type="date"
+                                    type="text"
+                                    inputMode="numeric"
+                                    placeholder="DD/MM/AAAA"
                                     className={`${inputClasses(errors.birthDate)} pl-12`}
                                     value={formData.birthDate}
-                                    onChange={e => setFormData({ ...formData, birthDate: e.target.value })}
+                                    onChange={handleDateChange}
                                 />
                             </div>
                             {errors.birthDate && <p className="text-xs text-red-600 flex items-center gap-1.5 font-bold mt-1.5 ml-1"><AlertCircle className="h-3.5 w-3.5" /> {errors.birthDate}</p>}
@@ -179,9 +215,11 @@ const PublicRegister: React.FC = () => {
                         </button>
 
                         {status === 'error' && (
-                            <p className="text-sm text-red-600 text-center font-bold animate-shake">
-                                Ocorreu um erro ao salvar. Tente novamente.
-                            </p>
+                            <div className="p-4 bg-red-50 border border-red-100 rounded-2xl space-y-2 animate-shake">
+                                <p className="text-xs text-red-600 text-center font-bold">
+                                    {errorMessage}
+                                </p>
+                            </div>
                         )}
                     </div>
 
