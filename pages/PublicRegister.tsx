@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useBirthdays } from '../context/BirthdayContext';
+import { formatPhone } from '../utils';
 import { Category, Birthday } from '../types';
 import { Save, AlertCircle, CheckCircle2, Calendar, User, Phone, Mail, ChevronLeft } from 'lucide-react';
 
@@ -30,6 +31,11 @@ const PublicRegister: React.FC = () => {
         if (value.length > 4) formatted = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4)}`;
 
         setFormData({ ...formData, birthDate: formatted });
+    };
+
+    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const formatted = formatPhone(e.target.value);
+        setFormData({ ...formData, phone: formatted });
     };
 
     const validate = () => {
@@ -190,7 +196,7 @@ const PublicRegister: React.FC = () => {
                                         placeholder="(00) 00000-0000"
                                         className={`${inputClasses()} pl-12`}
                                         value={formData.phone}
-                                        onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                        onChange={handlePhoneChange}
                                     />
                                 </div>
                             </div>
