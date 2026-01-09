@@ -43,8 +43,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   };
 
   const todayBdays = birthdays.filter(b => {
-    const d = daysUntil(b.birthDate);
-    return d === 0 || d === 365 || d === 366;
+    const [year, month, day] = b.birthDate.split('-').map(Number);
+    const bdayDate = new Date(year, month - 1, day);
+    const today = new Date();
+
+    return bdayDate.getMonth() === today.getMonth() && bdayDate.getDate() === today.getDate();
   });
 
   React.useEffect(() => {
@@ -108,17 +111,63 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <span className="font-bold text-xl text-slate-800 tracking-tight">BdayHub</span>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsNotifOpen(!isNotifOpen)}
-            className="relative p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
-          >
-            <Bell className="h-6 w-6" />
-            {unreadCount > 0 && (
-              <span className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center border-2 border-white">
-                {unreadCount}
-              </span>
+          <div className="relative">
+            <button
+              onClick={() => setIsNotifOpen(!isNotifOpen)}
+              className="relative p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+            >
+              <Bell className="h-6 w-6" />
+              {unreadCount > 0 && (
+                <span className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center border-2 border-white">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            {/* Notifications Dropdown (Mobile) */}
+            {isNotifOpen && (
+              <div className="absolute right-0 mt-3 w-[calc(100vw-40px)] bg-white rounded-2xl shadow-2xl border overflow-hidden z-[100] animate-in fade-in zoom-in duration-200 origin-top-right">
+                <div className="p-4 border-b flex items-center justify-between bg-slate-50/50">
+                  <span className="font-semibold text-slate-700">Notificações</span>
+                  {unreadCount > 0 && <span className="text-xs text-indigo-600 font-medium">{unreadCount} novas</span>}
+                </div>
+                <div className="max-h-[350px] overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <div className="p-8 text-center text-slate-400">
+                      <Bell className="h-8 w-8 mx-auto mb-2 opacity-20" />
+                      <p className="text-sm">Nenhuma notificação por enquanto.</p>
+                    </div>
+                  ) : (
+                    notifications.map(notif => (
+                      <div
+                        key={notif.id}
+                        onClick={() => {
+                          markNotificationRead(notif.id);
+                          setIsNotifOpen(false);
+                          navigate('/list');
+                        }}
+                        className={`p-4 border-b hover:bg-slate-50 cursor-pointer transition-colors ${!notif.isRead ? 'bg-indigo-50/30' : ''}`}
+                      >
+                        <div className="flex gap-3">
+                          <div className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${!notif.isRead ? 'bg-indigo-600' : 'bg-transparent'}`} />
+                          <div>
+                            <p className="text-sm font-semibold text-slate-800">{notif.title}</p>
+                            <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">{notif.message}</p>
+                            <p className="text-[10px] text-slate-400 mt-2">
+                              {new Date(notif.date).toLocaleDateString('pt-BR')}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <div className="p-3 text-center border-t bg-slate-50/50">
+                  <button onClick={() => setIsNotifOpen(false)} className="text-xs font-medium text-slate-500 hover:text-slate-700">Fechar</button>
+                </div>
+              </div>
             )}
-          </button>
+          </div>
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
@@ -204,7 +253,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
               {/* Notifications Dropdown */}
               {isNotifOpen && (
-                <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-xl border overflow-hidden z-50 animate-in fade-in zoom-in duration-200">
+                <div className="absolute right-0 mt-3 w-[calc(100vw-40px)] sm:w-80 bg-white rounded-2xl shadow-2xl border overflow-hidden z-50 animate-in fade-in zoom-in duration-200 origin-top-right">
                   <div className="p-4 border-b flex items-center justify-between bg-slate-50/50">
                     <span className="font-semibold text-slate-700">Notificações</span>
                     {unreadCount > 0 && <span className="text-xs text-indigo-600 font-medium">{unreadCount} novas</span>}

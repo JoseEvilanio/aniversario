@@ -1,7 +1,8 @@
 
 export const calculateAge = (birthDate: string): number => {
   const today = new Date();
-  const birth = new Date(birthDate);
+  const [year, month, day] = birthDate.split('-').map(Number);
+  const birth = new Date(year, month - 1, day);
   let age = today.getFullYear() - birth.getFullYear();
   const m = today.getMonth() - birth.getMonth();
   if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
@@ -12,9 +13,9 @@ export const calculateAge = (birthDate: string): number => {
 
 export const getNextOccurrence = (birthDate: string): Date => {
   const today = new Date();
-  const birth = new Date(birthDate);
-  const next = new Date(today.getFullYear(), birth.getMonth(), birth.getDate());
-  
+  const [_, month, day] = birthDate.split('-').map(Number);
+  const next = new Date(today.getFullYear(), month - 1, day);
+
   if (next < new Date(today.getFullYear(), today.getMonth(), today.getDate())) {
     next.setFullYear(today.getFullYear() + 1);
   }
@@ -35,7 +36,8 @@ export const formatDateBr = (dateString: string): string => {
 };
 
 export const formatShortDate = (dateString: string): string => {
-  const birth = new Date(dateString);
+  const [year, month, day] = dateString.split('-').map(Number);
+  const birth = new Date(year, month - 1, day);
   const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
   return `${birth.getDate()} de ${months[birth.getMonth()]}`;
 };
@@ -43,7 +45,7 @@ export const formatShortDate = (dateString: string): string => {
 export const formatPhone = (value: string): string => {
   if (!value) return "";
   value = value.replace(/\D/g, ""); // Remove tudo que não é dígito
-  
+
   if (value.length > 11) value = value.slice(0, 11); // Limita a 11 dígitos
 
   if (value.length > 10) {
