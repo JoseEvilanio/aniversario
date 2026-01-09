@@ -3,13 +3,15 @@ import React, { useState, useMemo } from 'react';
 import { useBirthdays } from '../context/BirthdayContext';
 import { calculateAge, daysUntil, formatDateBr } from '../utils';
 import { CATEGORY_COLORS } from '../constants';
-import { Search, Filter, Edit2, Trash2, Mail, Phone, PlusCircle } from 'lucide-react';
+import { Search, Filter, Edit2, Trash2, Mail, Phone, PlusCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const BirthdayList: React.FC = () => {
   const { birthdays, deleteBirthday } = useBirthdays();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState<'all' | 'today' | '7days' | '30days'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const filteredBirthdays = useMemo(() => {
     return birthdays
@@ -26,6 +28,17 @@ const BirthdayList: React.FC = () => {
       })
       .sort((a, b) => daysUntil(a.birthDate) - daysUntil(b.birthDate));
   }, [birthdays, searchTerm, activeFilter]);
+
+  const totalPages = Math.ceil(filteredBirthdays.length / itemsPerPage);
+  const paginatedBirthdays = filteredBirthdays.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Reset to first page when search or filter changes
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [searchTerm, activeFilter]);
 
   const handleDelete = (id: string, name: string) => {
     if (confirm(`Deseja realmente excluir o aniversário de ${name}?`)) {
@@ -89,14 +102,14 @@ const BirthdayList: React.FC = () => {
             </tr>
           </thead>
           <tbody className="divide-y">
-            {filteredBirthdays.length === 0 ? (
+            {paginatedBirthdays.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-6 py-12 text-center text-slate-400">
                   Nenhum aniversariante encontrado.
                 </td>
               </tr>
             ) : (
-              filteredBirthdays.map(b => (
+              paginatedBirthdays.map(b => (
                 <tr key={b.id} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -142,12 +155,12 @@ const BirthdayList: React.FC = () => {
 
       {/* Mobile Card View */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:hidden gap-4">
-        {filteredBirthdays.length === 0 ? (
+        {paginatedBirthdays.length === 0 ? (
           <div className="bg-white p-12 rounded-2xl border border-dashed border-slate-300 text-center text-slate-400 col-span-full">
             Nenhum aniversariante encontrado.
           </div>
         ) : (
-          filteredBirthdays.map(b => (
+          paginatedBirthdays.map(b => (
             <div key={b.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-5 animate-in fade-in zoom-in-95 duration-300 active:bg-slate-50 transition-colors">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3.5">
@@ -212,6 +225,44 @@ const BirthdayList: React.FC = () => {
           ))
         )}
       </div>
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between bg-white px-6 py-4 rounded-2xl border border-slate-100 shadow-sm">
+          <div className="hidden sm:block text-sm text-slate-500 font-medium">
+            Mostrando <span className="text-slate-900 font-bold">{(currentPage - 1) * itemsPerPage + 1}</span> a <span className="text-slate-900 font-bold">{Math.min(currentPage * itemsPerPage, filteredBirthdays.length)}</span> de <span className="text-slate-900 font-bold">{filteredBirthdays.length}</span> resultados
+          </div>
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="p-2.5 rounded-xl border border-slate-200 text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <div className="flex items-center gap-1.5">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`min-w-[40px] h-10 rounded-xl text-sm font-bold transition-all ${currentPage === page
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 scale-105'
+                    : 'bg-white text-slate-600 border border-slate-100 hover:bg-slate-50'
+                    }`}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="p-2.5 rounded-xl border border-slate-200 text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -12,16 +12,20 @@ import {
   X,
   Calendar,
   AlertTriangle,
-  RefreshCw
+  RefreshCw,
+  Gift,
+  ChevronRight
 } from 'lucide-react';
 import { useBirthdays } from '../context/BirthdayContext';
 import { useAuth } from '../context/AuthContext';
 import { auth } from '../firebase';
+import { calculateAge, daysUntil } from '../utils';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
-  const { notifications, unreadCount, markNotificationRead, permissionError, retryConnection } = useBirthdays();
+  const [showBdayModal, setShowBdayModal] = useState(false);
+  const { birthdays, notifications, unreadCount, markNotificationRead, permissionError, retryConnection } = useBirthdays();
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -37,6 +41,36 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     await auth.signOut();
     navigate('/login');
   };
+
+  const todayBdays = birthdays.filter(b => {
+    const d = daysUntil(b.birthDate);
+    return d === 0 || d === 365 || d === 366;
+  });
+
+  React.useEffect(() => {
+    if (todayBdays.length > 0) {
+      const today = new Date().toISOString().split('T')[0];
+      const lastShown = localStorage.getItem(`bday_notif_${user?.uid}_${today}`);
+
+      if (!lastShown) {
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        if (isMobile) {
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('Aniversariantes de Hoje! 🎂', {
+              body: `Hoje temos ${todayBdays.length} aniversariante(s)!`,
+              icon: '/favicon.ico'
+            });
+          } else if ('Notification' in window && Notification.permission !== 'denied') {
+            Notification.requestPermission();
+          }
+        } else {
+          setShowBdayModal(true);
+        }
+        localStorage.setItem(`bday_notif_${user?.uid}_${today}`, 'true');
+      }
+    }
+  }, [todayBdays.length, user?.uid]);
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-slate-50">
@@ -96,7 +130,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
       {/* Sidebar */}
       <aside className={`
-        fixed inset-y-0 left-0 z-[60] w-64 bg-white border-r transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0
+        fixed inset-y-0 left-0 z-[60] w-64 bg-white border-r transform transition-transform duration-200 ease-in-out md:translate-x-0
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         ${permissionError ? 'md:pt-12' : ''}
       `}>
@@ -114,7 +148,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </button>
           </div>
 
-          <nav className="flex-1 px-4 py-4 space-y-1">
+          <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
@@ -148,7 +182,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col md:pl-64">
         {/* Desktop Top Nav */}
         <header className={`hidden md:flex bg-white border-b px-8 py-4 items-center justify-between sticky top-0 z-30 ${permissionError ? 'mt-12' : ''}`}>
           <h1 className="text-lg font-semibold text-slate-800">
@@ -232,6 +266,70 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           {children}
         </div>
       </main>
+
+      {/* Modal de Aniversariantes do Dia (Desktop) */}
+      {showBdayModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="bg-indigo-600 p-8 text-center relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-full opacity-10">
+                <Gift className="absolute -top-4 -left-4 w-32 h-32 rotate-12" />
+                <Gift className="absolute -bottom-4 -right-4 w-32 h-32 -rotate-12" />
+              </div>
+              <div className="relative z-10">
+                <div className="bg-white/20 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-md">
+                  <Gift className="text-white h-10 w-10" />
+                </div>
+                <h2 className="text-2xl font-bold text-white">Aniversariantes de Hoje! 🎂</h2>
+                <p className="text-indigo-100 mt-2">Não esqueça de dar os parabéns!</p>
+              </div>
+            </div>
+
+            <div className="p-6 max-h-[400px] overflow-y-auto">
+              <div className="space-y-4">
+                {todayBdays.map(b => (
+                  <div key={b.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:bg-white hover:border-indigo-100 hover:shadow-md transition-all group">
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center font-bold text-lg shadow-sm">
+                        {b.fullName.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-800">{b.fullName}</p>
+                        <p className="text-sm text-slate-500">Fazendo {calculateAge(b.birthDate)} anos</p>
+                      </div>
+                    </div>
+                    <Link
+                      to="/list"
+                      onClick={() => setShowBdayModal(false)}
+                      className="p-2 text-slate-400 group-hover:text-indigo-600 transition-colors"
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-6 border-t bg-slate-50/50 flex flex-col gap-3">
+              <button
+                onClick={() => {
+                  setShowBdayModal(false);
+                  navigate('/list');
+                }}
+                className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold shadow-lg shadow-indigo-100 transition-all active:scale-95"
+              >
+                Ver Lista Completa
+              </button>
+              <button
+                onClick={() => setShowBdayModal(false)}
+                className="w-full py-3 text-slate-500 hover:text-slate-800 font-semibold transition-colors"
+              >
+                Lembrar depois
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Overlay for mobile sidebar */}
       {isSidebarOpen && (
