@@ -126,12 +126,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
             {/* Notifications Dropdown (Mobile) */}
             {isNotifOpen && (
-              <div className="absolute right-0 mt-3 w-[calc(100vw-40px)] bg-white rounded-2xl shadow-2xl border overflow-hidden z-[100] animate-in fade-in zoom-in duration-200 origin-top-right">
+              <div className="absolute right-0 mt-3 w-[calc(100vw-40px)] max-w-[340px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-[100] animate-in fade-in zoom-in duration-200 origin-top-right">
                 <div className="p-4 border-b flex items-center justify-between bg-slate-50/50">
                   <span className="font-semibold text-slate-700">Notificações</span>
                   {unreadCount > 0 && <span className="text-xs text-indigo-600 font-medium">{unreadCount} novas</span>}
                 </div>
-                <div className="max-h-[350px] overflow-y-auto">
+                <div className="max-h-[60vh] overflow-y-auto">
                   {notifications.length === 0 ? (
                     <div className="p-8 text-center text-slate-400">
                       <Bell className="h-8 w-8 mx-auto mb-2 opacity-20" />
@@ -146,14 +146,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                           setIsNotifOpen(false);
                           navigate('/list');
                         }}
-                        className={`p-4 border-b hover:bg-slate-50 cursor-pointer transition-colors ${!notif.isRead ? 'bg-indigo-50/30' : ''}`}
+                        className={`p-4 border-b last:border-0 hover:bg-slate-50 cursor-pointer transition-colors ${!notif.isRead ? 'bg-indigo-50/30' : ''}`}
                       >
                         <div className="flex gap-3">
                           <div className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${!notif.isRead ? 'bg-indigo-600' : 'bg-transparent'}`} />
-                          <div>
-                            <p className="text-sm font-semibold text-slate-800">{notif.title}</p>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-slate-800 truncate">{notif.title}</p>
                             <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">{notif.message}</p>
-                            <p className="text-[10px] text-slate-400 mt-2">
+                            <p className="text-[10px] text-slate-400 mt-2 font-medium">
                               {new Date(notif.date).toLocaleDateString('pt-BR')}
                             </p>
                           </div>
@@ -163,7 +163,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   )}
                 </div>
                 <div className="p-3 text-center border-t bg-slate-50/50">
-                  <button onClick={() => setIsNotifOpen(false)} className="text-xs font-medium text-slate-500 hover:text-slate-700">Fechar</button>
+                  <button onClick={() => setIsNotifOpen(false)} className="text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors py-1">Fechar</button>
                 </div>
               </div>
             )}
@@ -316,41 +316,41 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </div>
       </main>
 
-      {/* Modal de Aniversariantes do Dia (Desktop) */}
+      {/* Modal de Aniversariantes do Dia (Desktop & Mobile) */}
       {showBdayModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="bg-indigo-600 p-8 text-center relative overflow-hidden">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh] flex flex-col">
+            <div className="bg-indigo-600 p-6 sm:p-8 text-center relative overflow-hidden flex-shrink-0">
               <div className="absolute top-0 left-0 w-full h-full opacity-10">
-                <Gift className="absolute -top-4 -left-4 w-32 h-32 rotate-12" />
-                <Gift className="absolute -bottom-4 -right-4 w-32 h-32 -rotate-12" />
+                <Gift className="absolute -top-4 -left-4 w-24 h-24 sm:w-32 sm:h-32 rotate-12" />
+                <Gift className="absolute -bottom-4 -right-4 w-24 h-24 sm:w-32 sm:h-32 -rotate-12" />
               </div>
               <div className="relative z-10">
-                <div className="bg-white/20 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-md">
-                  <Gift className="text-white h-10 w-10" />
+                <div className="bg-white/20 w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 backdrop-blur-md">
+                  <Gift className="text-white h-8 w-8 sm:h-10 sm:w-10" />
                 </div>
-                <h2 className="text-2xl font-bold text-white">Aniversariantes de Hoje! 🎂</h2>
-                <p className="text-indigo-100 mt-2">Não esqueça de dar os parabéns!</p>
+                <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Aniversariantes de Hoje! 🎂</h2>
+                <p className="text-indigo-100 mt-1 sm:mt-2 text-sm sm:text-base opacity-90">Não esqueça de dar os parabéns!</p>
               </div>
             </div>
 
-            <div className="p-6 max-h-[400px] overflow-y-auto">
-              <div className="space-y-4">
+            <div className="p-4 sm:p-6 overflow-y-auto custom-scrollbar flex-1">
+              <div className="space-y-3 sm:space-y-4">
                 {todayBdays.map(b => (
-                  <div key={b.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:bg-white hover:border-indigo-100 hover:shadow-md transition-all group">
-                    <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center font-bold text-lg shadow-sm">
+                  <div key={b.id} className="flex items-center justify-between p-3.5 sm:p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:bg-white hover:border-indigo-100 hover:shadow-md transition-all group">
+                    <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                      <div className="h-10 w-10 sm:h-12 sm:w-12 bg-indigo-100 text-indigo-700 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-base sm:text-lg shadow-sm">
                         {b.fullName.charAt(0)}
                       </div>
-                      <div>
-                        <p className="font-bold text-slate-800">{b.fullName}</p>
-                        <p className="text-sm text-slate-500">Fazendo {calculateAge(b.birthDate)} anos</p>
+                      <div className="min-w-0">
+                        <p className="font-bold text-slate-800 truncate">{b.fullName}</p>
+                        <p className="text-xs sm:text-sm text-slate-500">Fazendo {calculateAge(b.birthDate)} anos</p>
                       </div>
                     </div>
                     <Link
                       to="/list"
                       onClick={() => setShowBdayModal(false)}
-                      className="p-2 text-slate-400 group-hover:text-indigo-600 transition-colors"
+                      className="p-2 text-slate-400 group-hover:text-indigo-600 transition-colors flex-shrink-0"
                     >
                       <ChevronRight className="h-5 w-5" />
                     </Link>
@@ -359,19 +359,19 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               </div>
             </div>
 
-            <div className="p-6 border-t bg-slate-50/50 flex flex-col gap-3">
+            <div className="p-4 sm:p-6 border-t bg-slate-50/50 flex flex-col gap-2.5 sm:gap-3 flex-shrink-0">
               <button
                 onClick={() => {
                   setShowBdayModal(false);
                   navigate('/list');
                 }}
-                className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold shadow-lg shadow-indigo-100 transition-all active:scale-95"
+                className="w-full py-3 sm:py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold shadow-lg shadow-indigo-100 transition-all active:scale-[0.98]"
               >
                 Ver Lista Completa
               </button>
               <button
                 onClick={() => setShowBdayModal(false)}
-                className="w-full py-3 text-slate-500 hover:text-slate-800 font-semibold transition-colors"
+                className="w-full py-2.5 sm:py-3 text-slate-500 hover:text-indigo-600 font-bold text-sm transition-colors"
               >
                 Lembrar depois
               </button>
